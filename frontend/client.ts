@@ -576,6 +576,7 @@ export namespace user {
  */
 import { getAnalytics as api_venue_analytics_getAnalytics } from "~backend/venue/analytics";
 import { getComparison as api_venue_comparison_getComparison } from "~backend/venue/comparison";
+import { match as api_venue_match_match } from "~backend/venue/match";
 import { getOptimization as api_venue_optimization_getOptimization } from "~backend/venue/optimization";
 
 export namespace venue {
@@ -588,6 +589,7 @@ export namespace venue {
             this.getAnalytics = this.getAnalytics.bind(this)
             this.getComparison = this.getComparison.bind(this)
             this.getOptimization = this.getOptimization.bind(this)
+            this.match = this.match.bind(this)
         }
 
         /**
@@ -627,6 +629,15 @@ export namespace venue {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI(`/venues/${encodeURIComponent(params.venue)}/optimization`, {method: "GET", body: undefined})
             return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_venue_optimization_getOptimization>
+        }
+
+        /**
+         * Match venues based on event requirements
+         */
+        public async match(params: RequestType<typeof api_venue_match_match>): Promise<ResponseType<typeof api_venue_match_match>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/venues/match`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_venue_match_match>
         }
     }
 }
