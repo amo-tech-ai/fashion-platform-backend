@@ -39,14 +39,16 @@ export const create = api<CreatePlanRequest, { planId: number }>(
       const plan = await tx.queryRow`
         INSERT INTO production_plans (
           event_id, event_type, attendee_count, budget, timeline_days,
-          venue_requirements, staffing_plan, vendor_requirements, success_criteria
+          venue_requirements, staffing_plan, vendor_requirements, success_criteria,
+          attendee_mix
         )
         VALUES (
           ${event.id}, ${eventType}, ${attendeeCount}, ${budget}, ${timelineDays},
           ${JSON.stringify(framework.venueRequirements)}, 
           ${JSON.stringify(framework.staffingPlan)}, 
           ${JSON.stringify(framework.vendorRequirements)}, 
-          ${JSON.stringify(framework.successCriteria)}
+          ${JSON.stringify(framework.successCriteria)},
+          ${JSON.stringify(framework.attendeeMix)}
         )
         RETURNING id
       `;

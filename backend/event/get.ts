@@ -24,13 +24,15 @@ export const get = api<GetEventParams, EventWithTickets>(
       throw APIError.notFound("Event not found");
     }
 
-    const tickets = await db.queryAll<EventTicketTier>`
-      SELECT * FROM event_ticket_tiers WHERE event_id = ${id}
-    `;
-
-    const bookingsCountResult = await db.queryRow`
-      SELECT SUM(quantity) as count FROM bookings WHERE event_id = ${id}
-    `;
+    const [tickets, bookingsCountResult] = await Promise.all([
+      db.queryAll<EventTicketTier>`
+        SELECT * FROM event_ticket_tiers WHERE event_id = ${id}
+      `,
+      db.queryRow`
+        SELECT SUM(quantity) as count FROM bookings WHERE event_id = ${id}
+      `
+    ]);
+    
     const bookingsCount = bookingsCountResult?.count || 0;
 
     return {

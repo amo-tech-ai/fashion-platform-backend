@@ -9,6 +9,7 @@ export interface ProductionPlan {
   staffingPlan: Record<string, any>;
   vendorRequirements: Record<string, any>;
   successCriteria: Record<string, any>;
+  attendeeMix: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,8 @@ export interface TimelineMilestone {
   dueDate: Date;
   status: 'pending' | 'in_progress' | 'completed' | 'delayed';
   assignedTo?: string;
+  dependsOn?: number[];
+  durationDays?: number;
 }
 
 export interface BudgetAllocation {

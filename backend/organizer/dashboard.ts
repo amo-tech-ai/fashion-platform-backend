@@ -33,20 +33,58 @@ export const getDashboardMetrics = api<GetDashboardMetricsParams, DashboardMetri
       LIMIT 5
     `;
 
-    const eventsWithMetrics: EventMetric[] = [];
-    for (const event of upcomingEvents) {
-      const tiers = await db.queryAll`
-        SELECT * FROM event_ticket_tiers WHERE event_id = ${event.id}
-      `;
-      const totalTickets = tiers.reduce((sum, t) => sum + t.quantity, 0);
+    const totalStats = await db.queryRow`
+      SELECT
+        COUNT(DISTINCT e.id) as total_events,
+        COALESCE(SUM(b.total_amount), 0) as total_revenue
+      FROM events e
+      LEFT JOIN bookings b ON e.id = b.event_id
+      WHERE e.organizer_id = ${organizerId}
+    `;
 
-      const bookings = await db.queryAll`
-        SELECT quantity, total_amount FROM bookings WHERE event_id = ${event.id}
-      `;
-      const ticketsSold = bookings.reduce((sum, b) => sum + b.quantity, 0);
-      const revenue = bookings.reduce((sum, b) => sum + b.total_amount, 0);
+    if (upcomingEvents.length === 0) {
+      return {
+        today: {
+          bookings: todayStats?.bookings || 0,
+          revenue: todayStats?.revenue || 0,
+        },
+        upcomingEvents: [],
+        totalEvents: totalStats?.total_events || 0,
+        totalRevenue: totalStats?.total_revenue || 0,
+      };
+    }
 
-      eventsWithMetrics.push({
+    const eventIds = upcomingEvents.map(e => e.id);
+
+    const tiersByEvent = await db.rawQueryAll`
+      SELECT event_id, SUM(quantity) as total_tickets
+      FROM event_ticket_tiers
+      WHERE event_id = ANY(${[eventIds]})
+      GROUP BY event_id
+    `;
+
+    const bookingsByEvent = await db.rawQueryAll`
+      SELECT event_id, SUM(quantity) as tickets_sold, SUM(total_amount) as revenue
+      FROM bookings
+      WHERE event_id = ANY(${[eventIds]})
+      GROUP BY event_id
+    `;
+
+    const tiersMap = tiersByEvent.reduce((acc, row) => {
+      acc[row.event_id] = row.total_tickets;
+      return acc;
+    }, {} as Record<number, number>);
+
+    const bookingsMap = bookingsByEvent.reduce((acc, row) => {
+      acc[row.event_id] = { ticketsSold: row.tickets_sold, revenue: row.revenue };
+      return acc;
+    }, {} as Record<number, { ticketsSold: number; revenue: number }>);
+
+    const eventsWithMetrics: EventMetric[] = upcomingEvents.map(event => {
+      const totalTickets = tiersMap[event.id] || 0;
+      const { ticketsSold, revenue } = bookingsMap[event.id] || { ticketsSold: 0, revenue: 0 };
+      
+      return {
         id: event.id,
         name: event.name,
         date: event.date,
@@ -56,17 +94,8 @@ export const getDashboardMetrics = api<GetDashboardMetricsParams, DashboardMetri
         totalTickets,
         revenue,
         daysUntil: Math.ceil((new Date(event.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-      });
-    }
-
-    const totalStats = await db.queryRow`
-      SELECT
-        COUNT(DISTINCT e.id) as total_events,
-        COALESCE(SUM(b.total_amount), 0) as total_revenue
-      FROM events e
-      LEFT JOIN bookings b ON e.id = b.event_id
-      WHERE e.organizer_id = ${organizerId}
-    `;
+      };
+    });
 
     return {
       today: {

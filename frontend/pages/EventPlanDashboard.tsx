@@ -16,8 +16,8 @@ export function EventPlanDashboard() {
   const { planId } = useParams<{ planId: string }>();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['production-plan', planId],
-    queryFn: () => backend.production.get({ planId: parseInt(planId!) }),
+    queryKey: ['production-plan-dashboard', planId],
+    queryFn: () => backend.production.getDashboard({ planId: parseInt(planId!) }),
     enabled: !!planId,
   });
 
@@ -36,7 +36,7 @@ export function EventPlanDashboard() {
     );
   }
 
-  if (!data) return <div>Error loading event plan.</div>;
+  if (!data) return <div>Error loading event plan dashboard.</div>;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -61,73 +61,67 @@ export function EventPlanDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white">{data.eventName}</h1>
-          <p className="text-gray-400 capitalize">{data.eventType.replace('_', ' ')} Production Plan</p>
+          <p className="text-gray-400">Production Plan Dashboard</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-gray-900/50 border-gray-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Event Date</CardTitle>
-              <Calendar className="h-4 w-4 text-purple-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">{new Date(data.eventDate).toLocaleDateString()}</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gray-900/50 border-gray-800">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Budget</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-400">Total Budget</CardTitle>
               <DollarSign className="h-4 w-4 text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">${data.budget.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-white">${data.totalBudget.toLocaleString()}</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-900/50 border-gray-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Attendees</CardTitle>
-              <Users className="h-4 w-4 text-blue-400" />
+              <CardTitle className="text-sm font-medium text-gray-400">Total Spent</CardTitle>
+              <DollarSign className="h-4 w-4 text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{data.attendeeCount}</div>
+              <div className="text-2xl font-bold text-white">${data.totalSpent.toLocaleString()}</div>
             </CardContent>
           </Card>
           <Card className="bg-gray-900/50 border-gray-800">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-400">Timeline</CardTitle>
-              <Clock className="h-4 w-4 text-orange-400" />
+              <CardTitle className="text-sm font-medium text-gray-400">Budget Variance</CardTitle>
+              <DollarSign className="h-4 w-4 text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{data.timelineDays} Days</div>
+              <div className={`text-2xl font-bold ${data.budgetVariance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                ${data.budgetVariance.toLocaleString()}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gray-900/50 border-gray-800">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Timeline Progress</CardTitle>
+              <Clock className="h-4 w-4 text-purple-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{data.timelineStatus.completionPercentage.toFixed(0)}%</div>
+              <Progress value={data.timelineStatus.completionPercentage} className="mt-2" />
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Timeline */}
+          {/* Budget Status */}
           <div className="lg:col-span-2">
             <Card className="bg-gray-900/50 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">Timeline Milestones</CardTitle>
+                <CardTitle className="text-white">Budget Status by Category</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {data.milestones.map(milestone => (
-                    <div key={milestone.id} className="flex items-center space-x-4">
-                      <div className="flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getStatusColor(milestone.status)}`}>
-                          {getStatusIcon(milestone.status)}
-                        </div>
-                        <div className="w-px h-8 bg-gray-700"></div>
+                  {data.budgetStatus.map(item => (
+                    <div key={item.category}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-300">{item.category}</span>
+                        <span className="text-white">${item.spent.toLocaleString()} / ${item.allocated.toLocaleString()}</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-white font-medium">{milestone.name}</p>
-                        <p className="text-gray-400 text-sm">{milestone.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-gray-300 text-sm">{new Date(milestone.dueDate).toLocaleDateString()}</p>
-                        <p className="text-gray-500 text-xs">{milestone.assignedTo}</p>
-                      </div>
+                      <Progress value={(item.spent / item.allocated) * 100} />
                     </div>
                   ))}
                 </div>
@@ -135,44 +129,34 @@ export function EventPlanDashboard() {
             </Card>
           </div>
 
-          {/* Budget & Stakeholders */}
+          {/* Timeline Summary */}
           <div className="space-y-8">
             <Card className="bg-gray-900/50 border-gray-800">
               <CardHeader>
-                <CardTitle className="text-white">Budget Allocation</CardTitle>
+                <CardTitle className="text-white">Timeline Summary</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.budgetAllocations.map(item => (
-                    <div key={item.id}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-300">{item.category}</span>
-                        <span className="text-white">${item.allocatedAmount.toLocaleString()} ({item.percentage}%)</span>
-                      </div>
-                      <Progress value={item.percentage} />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gray-900/50 border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">Key Stakeholders</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {data.stakeholders.map(stakeholder => (
-                    <div key={stakeholder.id} className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                        <UserCheck className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium">{stakeholder.role}</p>
-                        <p className="text-gray-400 text-xs">{stakeholder.responsibilities}</p>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Total Milestones</span>
+                    <span className="text-white">{data.timelineStatus.totalMilestones}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Completed</span>
+                    <span className="text-green-400">{data.timelineStatus.completed}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">In Progress</span>
+                    <span className="text-blue-400">{data.timelineStatus.inProgress}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Pending</span>
+                    <span className="text-yellow-400">{data.timelineStatus.pending}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Delayed</span>
+                    <span className="text-red-400">{data.timelineStatus.delayed}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
