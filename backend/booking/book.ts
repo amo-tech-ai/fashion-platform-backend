@@ -14,7 +14,7 @@ export interface BookTicketsRequest {
 
 // Book tickets for an event
 export const book = api<BookTicketsRequest, Booking>(
-  { method: "POST", path: "/bookings" },
+  { method: "POST", path: "/bookings", expose: true },
   async ({ eventId, ticketTierId, quantity, customerEmail, customerName }) => {
     await using tx = await db.begin();
     try {

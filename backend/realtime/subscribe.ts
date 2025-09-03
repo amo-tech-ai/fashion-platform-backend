@@ -1,7 +1,7 @@
 import { api, StreamOut } from "encore.dev/api";
 import { Subscription } from "encore.dev/pubsub";
-import { bookingTopic } from "~backend/booking/pubsub";
-import type { Booking } from "~backend/booking/types";
+import { bookingTopic } from "../booking/pubsub";
+import type { Booking } from "../booking/types";
 
 interface EventUpdate {
   type: 'booking';
