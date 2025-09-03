@@ -8,6 +8,8 @@ import { ShowDetailsPage } from './pages/ShowDetailsPage';
 import { BookingPage } from './pages/BookingPage';
 import { TicketsPage } from './pages/TicketsPage';
 import { WaitlistPage } from './pages/WaitlistPage';
+import { OrganizerDashboard } from './pages/OrganizerDashboard';
+import { ProjectOverview } from './pages/ProjectOverview';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +33,8 @@ export default function App() {
               <Route path="/shows/:showId/book" element={<BookingPage />} />
               <Route path="/tickets" element={<TicketsPage />} />
               <Route path="/waitlist" element={<WaitlistPage />} />
+              <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+              <Route path="/organizer/projects/:projectId" element={<ProjectOverview />} />
             </Routes>
           </main>
           <Toaster />

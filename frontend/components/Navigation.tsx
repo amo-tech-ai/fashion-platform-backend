@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, Ticket, Clock, Menu, X } from 'lucide-react';
+import { Calendar, Ticket, Clock, Menu, X, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -12,6 +12,7 @@ export function Navigation() {
     { href: '/', label: 'Shows', icon: Calendar },
     { href: '/tickets', label: 'My Tickets', icon: Ticket },
     { href: '/waitlist', label: 'Waitlist', icon: Clock },
+    { href: '/organizer/dashboard', label: 'Organizer', icon: LayoutDashboard },
   ];
 
   const NavContent = () => (
@@ -21,7 +22,7 @@ export function Navigation() {
           key={href}
           to={href}
           className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            location.pathname === href
+            location.pathname.startsWith(href) && href !== '/' || location.pathname === href
               ? 'bg-white text-black'
               : 'text-gray-300 hover:text-white hover:bg-gray-800'
           }`}
