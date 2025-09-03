@@ -1,5 +1,4 @@
 import { SQLDatabase } from "encore.dev/storage/sqldb";
 
-export const userDB = new SQLDatabase("user", {
-  migrations: "./migrations",
-});
+// Use the shared platform database
+export const db = SQLDatabase.named("platform");

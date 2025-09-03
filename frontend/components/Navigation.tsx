@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, Ticket, Clock, Menu, X, LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard, Calendar, Ticket, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -9,10 +9,9 @@ export function Navigation() {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const navItems = [
-    { href: '/', label: 'Shows', icon: Calendar },
-    { href: '/tickets', label: 'My Tickets', icon: Ticket },
-    { href: '/waitlist', label: 'Waitlist', icon: Clock },
-    { href: '/organizer/dashboard', label: 'Organizer', icon: LayoutDashboard },
+    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/events', label: 'Events', icon: Calendar },
+    { href: '/bookings', label: 'Bookings', icon: Ticket },
   ];
 
   const NavContent = () => (
@@ -22,7 +21,7 @@ export function Navigation() {
           key={href}
           to={href}
           className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            location.pathname.startsWith(href) && href !== '/' || location.pathname === href
+            location.pathname === href
               ? 'bg-white text-black'
               : 'text-gray-300 hover:text-white hover:bg-gray-800'
           }`}
@@ -39,20 +38,17 @@ export function Navigation() {
     <nav className="bg-black border-b border-gray-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">F</span>
             </div>
-            <span className="text-xl font-bold text-white">Fashionistas</span>
+            <span className="text-xl font-bold text-white">Fashion Events</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden lg:block">
             <NavContent />
           </div>
 
-          {/* Mobile Navigation */}
           <div className="lg:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
@@ -66,7 +62,7 @@ export function Navigation() {
                     <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center">
                       <span className="text-white font-bold text-sm">F</span>
                     </div>
-                    <span className="text-xl font-bold text-white">Fashionistas</span>
+                    <span className="text-xl font-bold text-white">Fashion Events</span>
                   </div>
                   <Button
                     variant="ghost"
