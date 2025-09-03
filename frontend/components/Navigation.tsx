@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Ticket, Menu, X } from 'lucide-react';
+import { Calendar, LayoutDashboard, Ticket, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -8,11 +8,18 @@ export function Navigation() {
   const location = useLocation();
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const navItems = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  const isOrganizerRoute = location.pathname.startsWith('/organizer');
+
+  const customerNavItems = [
     { href: '/events', label: 'Events', icon: Calendar },
-    { href: '/bookings', label: 'Bookings', icon: Ticket },
   ];
+
+  const organizerNavItems = [
+    { href: '/organizer', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/events', label: 'Public Events', icon: Calendar },
+  ];
+
+  const navItems = isOrganizerRoute ? organizerNavItems : customerNavItems;
 
   const NavContent = () => (
     <div className="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-8">
@@ -45,8 +52,15 @@ export function Navigation() {
             <span className="text-xl font-bold text-white">Fashion Events</span>
           </Link>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:flex lg:items-center lg:space-x-8">
             <NavContent />
+            {!isOrganizerRoute && (
+              <Link to="/organizer">
+                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
+                  Organizer Login
+                </Button>
+              </Link>
+            )}
           </div>
 
           <div className="lg:hidden">
@@ -73,7 +87,16 @@ export function Navigation() {
                     <X className="h-5 w-5" />
                   </Button>
                 </div>
-                <NavContent />
+                <div className="space-y-4">
+                  <NavContent />
+                  {!isOrganizerRoute && (
+                    <Link to="/organizer" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full border-gray-600 text-gray-300">
+                        Organizer Login
+                      </Button>
+                    </Link>
+                  )}
+                </div>
               </SheetContent>
             </Sheet>
           </div>

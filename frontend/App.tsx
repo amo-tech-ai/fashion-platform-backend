@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { Navigation } from './components/Navigation';
+import { EventList } from './pages/EventList';
+import { EventDetails } from './pages/EventDetails';
+import { BookingConfirmation } from './pages/BookingConfirmation';
 import { OrganizerDashboard } from './pages/OrganizerDashboard';
 import { EventAnalytics } from './pages/EventAnalytics';
 
@@ -23,8 +26,12 @@ export default function App() {
           <Navigation />
           <main>
             <Routes>
-              <Route path="/" element={<OrganizerDashboard />} />
-              <Route path="/events/:eventId/analytics" element={<EventAnalytics />} />
+              <Route path="/" element={<EventList />} />
+              <Route path="/events" element={<EventList />} />
+              <Route path="/events/:eventId" element={<EventDetails />} />
+              <Route path="/booking/:bookingCode" element={<BookingConfirmation />} />
+              <Route path="/organizer" element={<OrganizerDashboard />} />
+              <Route path="/organizer/events/:eventId/analytics" element={<EventAnalytics />} />
             </Routes>
           </main>
           <Toaster />
