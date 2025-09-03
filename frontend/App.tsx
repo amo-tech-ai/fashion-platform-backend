@@ -10,6 +10,7 @@ import { OrganizerDashboard } from './pages/OrganizerDashboard';
 import { EventAnalytics } from './pages/EventAnalytics';
 import { VenueAnalytics } from './pages/VenueAnalytics';
 import { VenueComparison } from './pages/VenueComparison';
+import { UserDashboard } from './pages/UserDashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ export default function App() {
               <Route path="/events" element={<EventList />} />
               <Route path="/events/:eventId" element={<EventDetails />} />
               <Route path="/booking/:bookingCode" element={<BookingConfirmation />} />
+              <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/organizer" element={<OrganizerDashboard />} />
               <Route path="/organizer/events/:eventId/analytics" element={<EventAnalytics />} />
               <Route path="/venues/:venue/analytics" element={<VenueAnalytics />} />

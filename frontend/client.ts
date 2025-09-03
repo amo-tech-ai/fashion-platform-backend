@@ -35,7 +35,11 @@ const BROWSER = typeof globalThis === "object" && ("window" in globalThis);
 export class Client {
     public readonly booking: booking.ServiceClient
     public readonly event: event.ServiceClient
+    public readonly group: group.ServiceClient
     public readonly realtime: realtime.ServiceClient
+    public readonly recommendation: recommendation.ServiceClient
+    public readonly sponsor: sponsor.ServiceClient
+    public readonly user: user.ServiceClient
     public readonly venue: venue.ServiceClient
     private readonly options: ClientOptions
     private readonly target: string
@@ -53,7 +57,11 @@ export class Client {
         const base = new BaseClient(this.target, this.options)
         this.booking = new booking.ServiceClient(base)
         this.event = new event.ServiceClient(base)
+        this.group = new group.ServiceClient(base)
         this.realtime = new realtime.ServiceClient(base)
+        this.recommendation = new recommendation.ServiceClient(base)
+        this.sponsor = new sponsor.ServiceClient(base)
+        this.user = new user.ServiceClient(base)
         this.venue = new venue.ServiceClient(base)
     }
 
@@ -89,6 +97,7 @@ export interface ClientOptions {
  * Import the endpoint handlers to derive the types for the client.
  */
 import { book as api_booking_book_book } from "~backend/booking/book";
+import { checkIn as api_booking_checkin_checkIn } from "~backend/booking/checkin";
 import { get as api_booking_get_get } from "~backend/booking/get";
 
 export namespace booking {
@@ -99,6 +108,7 @@ export namespace booking {
         constructor(baseClient: BaseClient) {
             this.baseClient = baseClient
             this.book = this.book.bind(this)
+            this.checkIn = this.checkIn.bind(this)
             this.get = this.get.bind(this)
         }
 
@@ -109,6 +119,15 @@ export namespace booking {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI(`/bookings`, {method: "POST", body: JSON.stringify(params)})
             return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_booking_book_book>
+        }
+
+        /**
+         * Check in a booking
+         */
+        public async checkIn(params: RequestType<typeof api_booking_checkin_checkIn>): Promise<ResponseType<typeof api_booking_checkin_checkIn>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/bookings/checkin`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_booking_checkin_checkIn>
         }
 
         /**
@@ -189,6 +208,186 @@ export namespace event {
 /**
  * Import the endpoint handlers to derive the types for the client.
  */
+import {
+    joinGroupBooking as api_group_book_joinGroupBooking,
+    updateGroupSize as api_group_book_updateGroupSize
+} from "~backend/group/book";
+import {
+    getChatMessages as api_group_chat_getChatMessages,
+    sendMessage as api_group_chat_sendMessage
+} from "~backend/group/chat";
+import { create as api_group_create_create } from "~backend/group/create";
+import {
+    get as api_group_get_get,
+    getUserGroupBookings as api_group_get_getUserGroupBookings
+} from "~backend/group/get";
+import {
+    respondToInvitation as api_group_invite_respondToInvitation,
+    sendInvitations as api_group_invite_sendInvitations,
+    sendReminders as api_group_invite_sendReminders
+} from "~backend/group/invite";
+import {
+    assignSeating as api_group_manage_assignSeating,
+    getGroupCheckIn as api_group_manage_getGroupCheckIn,
+    lockGroupBooking as api_group_manage_lockGroupBooking
+} from "~backend/group/manage";
+
+export namespace group {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.assignSeating = this.assignSeating.bind(this)
+            this.create = this.create.bind(this)
+            this.get = this.get.bind(this)
+            this.getChatMessages = this.getChatMessages.bind(this)
+            this.getGroupCheckIn = this.getGroupCheckIn.bind(this)
+            this.getUserGroupBookings = this.getUserGroupBookings.bind(this)
+            this.joinGroupBooking = this.joinGroupBooking.bind(this)
+            this.lockGroupBooking = this.lockGroupBooking.bind(this)
+            this.respondToInvitation = this.respondToInvitation.bind(this)
+            this.sendInvitations = this.sendInvitations.bind(this)
+            this.sendMessage = this.sendMessage.bind(this)
+            this.sendReminders = this.sendReminders.bind(this)
+            this.updateGroupSize = this.updateGroupSize.bind(this)
+        }
+
+        /**
+         * Assign seating for group members
+         */
+        public async assignSeating(params: RequestType<typeof api_group_manage_assignSeating>): Promise<ResponseType<typeof api_group_manage_assignSeating>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/seating`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_manage_assignSeating>
+        }
+
+        /**
+         * Create a new group booking
+         */
+        public async create(params: RequestType<typeof api_group_create_create>): Promise<ResponseType<typeof api_group_create_create>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_create_create>
+        }
+
+        /**
+         * Get group booking details by invite code
+         */
+        public async get(params: { inviteCode: string }): Promise<ResponseType<typeof api_group_get_get>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/${encodeURIComponent(params.inviteCode)}`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_get_get>
+        }
+
+        /**
+         * Get chat messages for a group
+         */
+        public async getChatMessages(params: RequestType<typeof api_group_chat_getChatMessages>): Promise<ResponseType<typeof api_group_chat_getChatMessages>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                limit:     params.limit === undefined ? undefined : String(params.limit),
+                offset:    params.offset === undefined ? undefined : String(params.offset),
+                userEmail: params.userEmail,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/chat/${encodeURIComponent(params.inviteCode)}`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_chat_getChatMessages>
+        }
+
+        /**
+         * Get group check-in information
+         */
+        public async getGroupCheckIn(params: { inviteCode: string }): Promise<ResponseType<typeof api_group_manage_getGroupCheckIn>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/checkin/${encodeURIComponent(params.inviteCode)}`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_manage_getGroupCheckIn>
+        }
+
+        /**
+         * Get all group bookings for a user
+         */
+        public async getUserGroupBookings(params: RequestType<typeof api_group_get_getUserGroupBookings>): Promise<ResponseType<typeof api_group_get_getUserGroupBookings>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                email: params.email,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/users/group-bookings`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_get_getUserGroupBookings>
+        }
+
+        /**
+         * Join a group booking by purchasing tickets
+         */
+        public async joinGroupBooking(params: RequestType<typeof api_group_book_joinGroupBooking>): Promise<ResponseType<typeof api_group_book_joinGroupBooking>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/join`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_book_joinGroupBooking>
+        }
+
+        /**
+         * Lock group booking (no more changes allowed)
+         */
+        public async lockGroupBooking(params: RequestType<typeof api_group_manage_lockGroupBooking>): Promise<ResponseType<typeof api_group_manage_lockGroupBooking>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/lock`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_manage_lockGroupBooking>
+        }
+
+        /**
+         * Respond to a group booking invitation
+         */
+        public async respondToInvitation(params: RequestType<typeof api_group_invite_respondToInvitation>): Promise<ResponseType<typeof api_group_invite_respondToInvitation>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/respond`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_invite_respondToInvitation>
+        }
+
+        /**
+         * Send invitations to join a group booking
+         */
+        public async sendInvitations(params: RequestType<typeof api_group_invite_sendInvitations>): Promise<ResponseType<typeof api_group_invite_sendInvitations>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/invite`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_invite_sendInvitations>
+        }
+
+        /**
+         * Send a message to the group chat
+         */
+        public async sendMessage(params: RequestType<typeof api_group_chat_sendMessage>): Promise<ResponseType<typeof api_group_chat_sendMessage>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/chat`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_chat_sendMessage>
+        }
+
+        /**
+         * Send reminders to people who haven't booked yet
+         */
+        public async sendReminders(params: RequestType<typeof api_group_invite_sendReminders>): Promise<ResponseType<typeof api_group_invite_sendReminders>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/remind`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_invite_sendReminders>
+        }
+
+        /**
+         * Update group size (only allowed until 48 hours before event)
+         */
+        public async updateGroupSize(params: RequestType<typeof api_group_book_updateGroupSize>): Promise<ResponseType<typeof api_group_book_updateGroupSize>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/group-bookings/size`, {method: "PUT", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_group_book_updateGroupSize>
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
 import { subscribeToEventUpdates as api_realtime_subscribe_subscribeToEventUpdates } from "~backend/realtime/subscribe";
 
 export namespace realtime {
@@ -206,6 +405,168 @@ export namespace realtime {
          */
         public async subscribeToEventUpdates(params: { eventId: number }): Promise<StreamIn<StreamResponse<typeof api_realtime_subscribe_subscribeToEventUpdates>>> {
             return await this.baseClient.createStreamIn(`/events/${encodeURIComponent(params.eventId)}/subscribe`)
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
+import {
+    getRecommendations as api_recommendation_engine_getRecommendations,
+    getSimilarEvents as api_recommendation_engine_getSimilarEvents
+} from "~backend/recommendation/engine";
+
+export namespace recommendation {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.getRecommendations = this.getRecommendations.bind(this)
+            this.getSimilarEvents = this.getSimilarEvents.bind(this)
+        }
+
+        /**
+         * Get personalized event recommendations
+         */
+        public async getRecommendations(params: RequestType<typeof api_recommendation_engine_getRecommendations>): Promise<ResponseType<typeof api_recommendation_engine_getRecommendations>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                email:         params.email,
+                includeBooked: params.includeBooked === undefined ? undefined : String(params.includeBooked),
+                limit:         params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/recommendations`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_recommendation_engine_getRecommendations>
+        }
+
+        /**
+         * Get similar events based on a specific event
+         */
+        public async getSimilarEvents(params: RequestType<typeof api_recommendation_engine_getSimilarEvents>): Promise<ResponseType<typeof api_recommendation_engine_getSimilarEvents>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                email: params.email,
+                limit: params.limit === undefined ? undefined : String(params.limit),
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/recommendations/similar/${encodeURIComponent(params.eventId)}`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_recommendation_engine_getSimilarEvents>
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
+import { createLead as api_sponsor_lead_capture_createLead } from "~backend/sponsor/lead_capture";
+import {
+    getEventOpportunities as api_sponsor_packages_getEventOpportunities,
+    getPackages as api_sponsor_packages_getPackages
+} from "~backend/sponsor/packages";
+import {
+    respondToProposal as api_sponsor_proposals_respondToProposal,
+    trackProposalView as api_sponsor_proposals_trackProposalView
+} from "~backend/sponsor/proposals";
+
+export namespace sponsor {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.createLead = this.createLead.bind(this)
+            this.getEventOpportunities = this.getEventOpportunities.bind(this)
+            this.getPackages = this.getPackages.bind(this)
+            this.respondToProposal = this.respondToProposal.bind(this)
+            this.trackProposalView = this.trackProposalView.bind(this)
+        }
+
+        /**
+         * Create a new sponsor lead with automatic scoring and package recommendations
+         */
+        public async createLead(params: RequestType<typeof api_sponsor_lead_capture_createLead>): Promise<ResponseType<typeof api_sponsor_lead_capture_createLead>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/sponsor/leads`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_sponsor_lead_capture_createLead>
+        }
+
+        /**
+         * Get sponsorship opportunities for an event
+         */
+        public async getEventOpportunities(params: { eventId: number }): Promise<ResponseType<typeof api_sponsor_packages_getEventOpportunities>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/sponsor/opportunities/${encodeURIComponent(params.eventId)}`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_sponsor_packages_getEventOpportunities>
+        }
+
+        /**
+         * Get all sponsorship packages
+         */
+        public async getPackages(): Promise<ResponseType<typeof api_sponsor_packages_getPackages>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/sponsor/packages`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_sponsor_packages_getPackages>
+        }
+
+        /**
+         * Respond to proposal
+         */
+        public async respondToProposal(params: RequestType<typeof api_sponsor_proposals_respondToProposal>): Promise<ResponseType<typeof api_sponsor_proposals_respondToProposal>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/sponsor/proposals/respond`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_sponsor_proposals_respondToProposal>
+        }
+
+        /**
+         * Track when proposal is viewed
+         */
+        public async trackProposalView(params: RequestType<typeof api_sponsor_proposals_trackProposalView>): Promise<ResponseType<typeof api_sponsor_proposals_trackProposalView>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/sponsor/proposals/track-view`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_sponsor_proposals_trackProposalView>
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
+import { getBookingHistory as api_user_booking_history_getBookingHistory } from "~backend/user/booking_history";
+
+export namespace user {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.getBookingHistory = this.getBookingHistory.bind(this)
+        }
+
+        /**
+         * Get user booking history
+         */
+        public async getBookingHistory(params: RequestType<typeof api_user_booking_history_getBookingHistory>): Promise<ResponseType<typeof api_user_booking_history_getBookingHistory>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                email:     params.email,
+                endDate:   params.endDate,
+                limit:     params.limit === undefined ? undefined : String(params.limit),
+                offset:    params.offset === undefined ? undefined : String(params.offset),
+                startDate: params.startDate,
+                status:    params.status,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/users/booking-history`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_user_booking_history_getBookingHistory>
         }
     }
 }

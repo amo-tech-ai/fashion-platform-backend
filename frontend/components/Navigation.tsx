@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, LayoutDashboard, Ticket, Menu, X, Building2, BarChart3 } from 'lucide-react';
+import { Calendar, LayoutDashboard, Ticket, Menu, X, Building2, BarChart3, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -10,9 +10,11 @@ export function Navigation() {
 
   const isOrganizerRoute = location.pathname.startsWith('/organizer');
   const isVenueRoute = location.pathname.startsWith('/venues');
+  const isDashboardRoute = location.pathname.startsWith('/dashboard');
 
   const customerNavItems = [
     { href: '/events', label: 'Events', icon: Calendar },
+    { href: '/dashboard', label: 'My Dashboard', icon: User },
   ];
 
   const organizerNavItems = [
@@ -63,7 +65,28 @@ export function Navigation() {
           <div className="hidden lg:flex lg:items-center lg:space-x-8">
             <NavContent />
             <div className="flex items-center space-x-4">
-              {!isOrganizerRoute && !isVenueRoute && (
+              {!isOrganizerRoute && !isVenueRoute && !isDashboardRoute && (
+                <>
+                  <Link to="/dashboard">
+                    <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
+                      <User className="h-4 w-4 mr-2" />
+                      My Dashboard
+                    </Button>
+                  </Link>
+                  <Link to="/organizer">
+                    <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
+                      Organizer Login
+                    </Button>
+                  </Link>
+                  <Link to="/venues/comparison">
+                    <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
+                      <Building2 className="h-4 w-4 mr-2" />
+                      Venue Analytics
+                    </Button>
+                  </Link>
+                </>
+              )}
+              {isDashboardRoute && (
                 <>
                   <Link to="/organizer">
                     <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
@@ -107,7 +130,28 @@ export function Navigation() {
                 </div>
                 <div className="space-y-4">
                   <NavContent />
-                  {!isOrganizerRoute && !isVenueRoute && (
+                  {!isOrganizerRoute && !isVenueRoute && !isDashboardRoute && (
+                    <>
+                      <Link to="/dashboard" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full border-gray-600 text-gray-300">
+                          <User className="h-4 w-4 mr-2" />
+                          My Dashboard
+                        </Button>
+                      </Link>
+                      <Link to="/organizer" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full border-gray-600 text-gray-300">
+                          Organizer Login
+                        </Button>
+                      </Link>
+                      <Link to="/venues/comparison" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full border-gray-600 text-gray-300">
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Venue Analytics
+                        </Button>
+                      </Link>
+                    </>
+                  )}
+                  {isDashboardRoute && (
                     <>
                       <Link to="/organizer" onClick={() => setIsOpen(false)}>
                         <Button variant="outline" className="w-full border-gray-600 text-gray-300">
