@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   Calendar, MapPin, Clock, Users, DollarSign, 
-  Minus, Plus, CreditCard, Mail, User, Phone 
+  Minus, Plus, CreditCard, Mail, User, Phone, UserPlus
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -135,6 +135,34 @@ export function EventDetails() {
               {event.description}
             </p>
           )}
+        </div>
+
+        {/* Group Booking Option */}
+        <div className="mb-8">
+          <Card className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-purple-600/30">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-white text-lg font-semibold mb-2">Booking for a Group?</h3>
+                  <p className="text-gray-300 text-sm mb-2">
+                    Get group discounts and coordinate seating for 5+ people
+                  </p>
+                  <div className="flex items-center space-x-4 text-sm text-purple-300">
+                    <span>• 10-20% group discounts</span>
+                    <span>• Complimentary tickets</span>
+                    <span>• Seated together</span>
+                    <span>• Group chat</span>
+                  </div>
+                </div>
+                <Link to={`/events/${event.id}/create-group`}>
+                  <Button className="bg-purple-600 hover:bg-purple-700">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Create Group Booking
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -341,7 +369,7 @@ export function EventDetails() {
                   </>
                 ) : (
                   <div className="text-center py-8">
-                    <Ticket className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                    <Users className="h-12 w-12 text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-400">Select a ticket type to continue</p>
                   </div>
                 )}

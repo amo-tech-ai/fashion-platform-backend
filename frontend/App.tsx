@@ -11,6 +11,8 @@ import { EventAnalytics } from './pages/EventAnalytics';
 import { VenueAnalytics } from './pages/VenueAnalytics';
 import { VenueComparison } from './pages/VenueComparison';
 import { UserDashboard } from './pages/UserDashboard';
+import { GroupBooking } from './pages/GroupBooking';
+import { CreateGroupBooking } from './pages/CreateGroupBooking';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +34,8 @@ export default function App() {
               <Route path="/" element={<EventList />} />
               <Route path="/events" element={<EventList />} />
               <Route path="/events/:eventId" element={<EventDetails />} />
+              <Route path="/events/:eventId/create-group" element={<CreateGroupBooking />} />
+              <Route path="/group/:inviteCode" element={<GroupBooking />} />
               <Route path="/booking/:bookingCode" element={<BookingConfirmation />} />
               <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/organizer" element={<OrganizerDashboard />} />

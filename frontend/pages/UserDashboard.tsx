@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { 
   Calendar, MapPin, Clock, DollarSign, Ticket, 
   Heart, Star, TrendingUp, Filter, Download,
-  User, Mail, Settings, BarChart3
+  User, Mail, Settings, BarChart3, Users
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GroupBookingCard } from '../components/GroupBookingCard';
 import backend from '~backend/client';
 
 export function UserDashboard() {
@@ -41,6 +42,12 @@ export function UserDashboard() {
   const { data: insights } = useQuery({
     queryKey: ['booking-insights', userEmail],
     queryFn: () => backend.user.getBookingInsights({ email: userEmail }),
+    enabled: !!userEmail,
+  });
+
+  const { data: groupBookings } = useQuery({
+    queryKey: ['user-group-bookings', userEmail],
+    queryFn: () => backend.group.getUserGroupBookings({ email: userEmail }),
     enabled: !!userEmail,
   });
 
@@ -147,6 +154,9 @@ export function UserDashboard() {
             </TabsTrigger>
             <TabsTrigger value="history" className="data-[state=active]:bg-purple-600">
               Booking History
+            </TabsTrigger>
+            <TabsTrigger value="groups" className="data-[state=active]:bg-purple-600">
+              Group Bookings
             </TabsTrigger>
             <TabsTrigger value="insights" className="data-[state=active]:bg-purple-600">
               Insights
@@ -368,6 +378,32 @@ export function UserDashboard() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="groups" className="space-y-6">
+            <Card className="bg-gray-900/50 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-purple-400" />
+                  <span>My Group Bookings</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {groupBookings?.groupBookings.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400">No group bookings found.</p>
+                    <p className="text-gray-500 text-sm">Create or join a group booking to see them here!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {groupBookings?.groupBookings.map((groupBooking) => (
+                      <GroupBookingCard key={groupBooking.id} groupBooking={groupBooking} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="insights" className="space-y-6">
             {insights && (
               <>
@@ -388,13 +424,13 @@ export function UserDashboard() {
                             <div>
                               <div className="text-white font-medium">{venue.venue}</div>
                               <div className="text-gray-400 text-sm">
-                                {venue.booking_count} bookings • Last: {new Date(venue.last_booking).toLocaleDateString()}
+                                {venue.bookingCount} bookings • Last: {new Date(venue.lastBooking).toLocaleDateString()}
                               </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-white font-semibold">${venue.total_spent.toLocaleString()}</div>
-                            <div className="text-gray-400 text-sm">${venue.avg_spent.toFixed(0)} avg</div>
+                            <div className="text-white font-semibold">${venue.totalSpent.toLocaleString()}</div>
+                            <div className="text-gray-400 text-sm">${venue.avgSpent.toFixed(0)} avg</div>
                           </div>
                         </div>
                       ))}
@@ -419,7 +455,7 @@ export function UserDashboard() {
                           </span>
                           <div className="flex items-center space-x-4">
                             <span className="text-gray-400 text-sm">{pattern.bookings} bookings</span>
-                            <span className="text-white font-medium">${pattern.total_spent.toLocaleString()}</span>
+                            <span className="text-white font-medium">${pattern.totalSpent.toLocaleString()}</span>
                           </div>
                         </div>
                       ))}
