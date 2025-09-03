@@ -13,6 +13,10 @@ import { VenueComparison } from './pages/VenueComparison';
 import { UserDashboard } from './pages/UserDashboard';
 import { GroupBooking } from './pages/GroupBooking';
 import { CreateGroupBooking } from './pages/CreateGroupBooking';
+import { SponsorDashboard } from './pages/SponsorDashboard';
+import { SponsorLeadForm } from './pages/SponsorLeadForm';
+import { SponsorPortal } from './pages/SponsorPortal';
+import { SponsorProspecting } from './pages/SponsorProspecting';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +44,10 @@ export default function App() {
               <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/organizer" element={<OrganizerDashboard />} />
               <Route path="/organizer/events/:eventId/analytics" element={<EventAnalytics />} />
+              <Route path="/organizer/sponsors" element={<SponsorDashboard />} />
+              <Route path="/organizer/prospecting" element={<SponsorProspecting />} />
+              <Route path="/sponsor-us" element={<SponsorLeadForm />} />
+              <Route path="/sponsor-portal/:contractId" element={<SponsorPortal />} />
               <Route path="/venues/:venue/analytics" element={<VenueAnalytics />} />
               <Route path="/venues/comparison" element={<VenueComparison />} />
             </Routes>

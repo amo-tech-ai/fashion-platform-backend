@@ -4,7 +4,7 @@ import {
   Users, DollarSign, TrendingUp, Clock, 
   Star, Filter, Search, Plus, Mail, Phone,
   Calendar, MapPin, Award, Target, CheckCircle,
-  AlertCircle, XCircle, Eye, Send, FileText
+  AlertCircle, XCircle, Eye, Send, FileText, BarChart
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +53,11 @@ export function SponsorDashboard() {
   const { data: packages } = useQuery({
     queryKey: ['sponsorship-packages'],
     queryFn: () => backend.sponsor.getPackages(),
+  });
+
+  const { data: pipelineAnalytics } = useQuery({
+    queryKey: ['pipeline-analytics'],
+    queryFn: () => backend.sponsor.getPipelineAnalytics(),
   });
 
   const updateStatusMutation = useMutation({
@@ -201,6 +206,9 @@ export function SponsorDashboard() {
           <TabsList className="bg-gray-800 border-gray-700">
             <TabsTrigger value="leads" className="data-[state=active]:bg-purple-600">
               Leads
+            </TabsTrigger>
+            <TabsTrigger value="pipeline" className="data-[state=active]:bg-purple-600">
+              Pipeline
             </TabsTrigger>
             <TabsTrigger value="packages" className="data-[state=active]:bg-purple-600">
               Packages
@@ -383,6 +391,56 @@ export function SponsorDashboard() {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pipeline" className="space-y-6">
+            <Card className="bg-gray-900/50 border-gray-800">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <BarChart className="h-5 w-5 text-purple-400" />
+                  <span>Sponsorship Pipeline</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pipelineAnalytics ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
+                      {Object.entries(pipelineAnalytics.funnel).map(([stage, count]) => (
+                        <div key={stage} className="p-4 bg-gray-800/50 rounded-lg">
+                          <h4 className="text-gray-400 text-sm capitalize">{stage}</h4>
+                          <p className="text-2xl font-bold text-white">{count}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-white font-semibold mb-2">Conversion Rates</h4>
+                        <div className="space-y-2">
+                          {Object.entries(pipelineAnalytics.conversionRates).map(([rate, value]) => (
+                            <div key={rate} className="flex justify-between items-center">
+                              <span className="text-gray-300 text-sm capitalize">{rate.replace(/([A-Z])/g, ' $1')}</span>
+                              <span className="text-white font-medium">{value.toFixed(1)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="text-white font-semibold">Pipeline Value</h4>
+                          <p className="text-3xl font-bold text-green-400">${pipelineAnalytics.pipelineValue.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <h4 className="text-white font-semibold">Average Time to Convert</h4>
+                          <p className="text-3xl font-bold text-blue-400">{pipelineAnalytics.averageTimeToConvert} days</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Skeleton className="h-64" />
+                )}
               </CardContent>
             </Card>
           </TabsContent>

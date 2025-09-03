@@ -37,10 +37,12 @@ export interface SponsorLead {
   leadSource?: string;
   status: LeadStatus;
   leadScore: number;
+  engagementScore: number;
   assignedTo?: string;
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
+  lastEngagedAt?: Date;
 }
 
 export interface SponsorshipPackage {
@@ -101,6 +103,8 @@ export interface SponsorContract {
   startDate?: Date;
   endDate?: Date;
   deliverables?: Record<string, any>;
+  renewalStatus: 'pending' | 'offered' | 'negotiating' | 'renewed' | 'declined';
+  renewalNotes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -139,5 +143,78 @@ export interface LeadActivity {
   description?: string;
   performedBy?: string;
   metadata?: Record<string, any>;
+  createdAt: Date;
+}
+
+export interface SponsorProspect {
+  id: number;
+  companyName: string;
+  website?: string;
+  industry?: string;
+  source?: string;
+  status: 'new' | 'researching' | 'contacted' | 'converted' | 'rejected';
+  fitScore: number;
+  enrichmentData?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface LeadEngagementEvent {
+  id: number;
+  leadId: number;
+  eventType: 'email_open' | 'link_click' | 'page_view' | 'form_submit';
+  metadata?: Record<string, any>;
+  createdAt: Date;
+}
+
+export interface OutreachCampaign {
+  id: number;
+  name: string;
+  description?: string;
+  targetIndustry?: string;
+  targetCompanySize?: CompanySize;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+export interface CampaignEmail {
+  id: number;
+  campaignId: number;
+  sequenceNumber: number;
+  delayDays: number;
+  subjectTemplate: string;
+  bodyTemplate: string;
+  createdAt: Date;
+}
+
+export interface LeadCampaignEnrollment {
+  id: number;
+  leadId: number;
+  campaignId: number;
+  status: 'active' | 'paused' | 'completed' | 'unsubscribed';
+  currentSequence: number;
+  lastSentAt?: Date;
+  enrolledAt: Date;
+}
+
+export interface SponsorAsset {
+  id: number;
+  contractId: number;
+  assetType: string;
+  fileUrl: string;
+  submittedBy?: string;
+  status: 'submitted' | 'approved' | 'rejected';
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RenewalOffer {
+  id: number;
+  contractId: number;
+  offerAmount: number;
+  incentives?: string[];
+  validUntil?: Date;
+  status: 'draft' | 'sent' | 'accepted' | 'rejected';
   createdAt: Date;
 }
