@@ -17,6 +17,8 @@ import { SponsorDashboard } from './pages/SponsorDashboard';
 import { SponsorLeadForm } from './pages/SponsorLeadForm';
 import { SponsorPortal } from './pages/SponsorPortal';
 import { SponsorProspecting } from './pages/SponsorProspecting';
+import { CreateEventPlan } from './pages/CreateEventPlan';
+import { EventPlanDashboard } from './pages/EventPlanDashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +45,8 @@ export default function App() {
               <Route path="/booking/:bookingCode" element={<BookingConfirmation />} />
               <Route path="/dashboard" element={<UserDashboard />} />
               <Route path="/organizer" element={<OrganizerDashboard />} />
+              <Route path="/organizer/planning/new" element={<CreateEventPlan />} />
+              <Route path="/organizer/plans/:planId" element={<EventPlanDashboard />} />
               <Route path="/organizer/events/:eventId/analytics" element={<EventAnalytics />} />
               <Route path="/organizer/sponsors" element={<SponsorDashboard />} />
               <Route path="/organizer/prospecting" element={<SponsorProspecting />} />

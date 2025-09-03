@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, LayoutDashboard, Ticket, Menu, X, Building2, BarChart3, User } from 'lucide-react';
+import { Calendar, LayoutDashboard, Ticket, Menu, X, Building2, BarChart3, User, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -19,6 +19,7 @@ export function Navigation() {
 
   const organizerNavItems = [
     { href: '/organizer', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/organizer/planning/new', label: 'Plan Event', icon: ClipboardList },
     { href: '/events', label: 'Public Events', icon: Calendar },
   ];
 
