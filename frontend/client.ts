@@ -127,6 +127,7 @@ export namespace booking {
  */
 import { get as api_event_get_get } from "~backend/event/get";
 import { list as api_event_list_list } from "~backend/event/list";
+import { search as api_event_search_search } from "~backend/event/search";
 
 export namespace event {
 
@@ -137,6 +138,7 @@ export namespace event {
             this.baseClient = baseClient
             this.get = this.get.bind(this)
             this.list = this.list.bind(this)
+            this.search = this.search.bind(this)
         }
 
         /**
@@ -155,6 +157,31 @@ export namespace event {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI(`/events`, {method: "GET", body: undefined})
             return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_event_list_list>
+        }
+
+        /**
+         * Search events with comprehensive filtering
+         */
+        public async search(params: RequestType<typeof api_event_search_search>): Promise<ResponseType<typeof api_event_search_search>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                availableOnly: params.availableOnly === undefined ? undefined : String(params.availableOnly),
+                endDate:       params.endDate,
+                eventType:     params.eventType,
+                limit:         params.limit === undefined ? undefined : String(params.limit),
+                maxPrice:      params.maxPrice === undefined ? undefined : String(params.maxPrice),
+                minPrice:      params.minPrice === undefined ? undefined : String(params.minPrice),
+                offset:        params.offset === undefined ? undefined : String(params.offset),
+                query:         params.query,
+                sortBy:        params.sortBy,
+                sortOrder:     params.sortOrder,
+                startDate:     params.startDate,
+                venue:         params.venue,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/events/search`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_event_search_search>
         }
     }
 }
