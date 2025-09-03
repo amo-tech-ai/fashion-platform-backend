@@ -8,6 +8,8 @@ import { EventDetails } from './pages/EventDetails';
 import { BookingConfirmation } from './pages/BookingConfirmation';
 import { OrganizerDashboard } from './pages/OrganizerDashboard';
 import { EventAnalytics } from './pages/EventAnalytics';
+import { VenueAnalytics } from './pages/VenueAnalytics';
+import { VenueComparison } from './pages/VenueComparison';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +34,8 @@ export default function App() {
               <Route path="/booking/:bookingCode" element={<BookingConfirmation />} />
               <Route path="/organizer" element={<OrganizerDashboard />} />
               <Route path="/organizer/events/:eventId/analytics" element={<EventAnalytics />} />
+              <Route path="/venues/:venue/analytics" element={<VenueAnalytics />} />
+              <Route path="/venues/comparison" element={<VenueComparison />} />
             </Routes>
           </main>
           <Toaster />

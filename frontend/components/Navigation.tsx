@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calendar, LayoutDashboard, Ticket, Menu, X } from 'lucide-react';
+import { Calendar, LayoutDashboard, Ticket, Menu, X, Building2, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -9,6 +9,7 @@ export function Navigation() {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const isOrganizerRoute = location.pathname.startsWith('/organizer');
+  const isVenueRoute = location.pathname.startsWith('/venues');
 
   const customerNavItems = [
     { href: '/events', label: 'Events', icon: Calendar },
@@ -19,7 +20,14 @@ export function Navigation() {
     { href: '/events', label: 'Public Events', icon: Calendar },
   ];
 
-  const navItems = isOrganizerRoute ? organizerNavItems : customerNavItems;
+  const venueNavItems = [
+    { href: '/venues/comparison', label: 'Venue Comparison', icon: BarChart3 },
+    { href: '/events', label: 'Events', icon: Calendar },
+  ];
+
+  let navItems = customerNavItems;
+  if (isOrganizerRoute) navItems = organizerNavItems;
+  if (isVenueRoute) navItems = venueNavItems;
 
   const NavContent = () => (
     <div className="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-8">
@@ -54,13 +62,23 @@ export function Navigation() {
 
           <div className="hidden lg:flex lg:items-center lg:space-x-8">
             <NavContent />
-            {!isOrganizerRoute && (
-              <Link to="/organizer">
-                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
-                  Organizer Login
-                </Button>
-              </Link>
-            )}
+            <div className="flex items-center space-x-4">
+              {!isOrganizerRoute && !isVenueRoute && (
+                <>
+                  <Link to="/organizer">
+                    <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
+                      Organizer Login
+                    </Button>
+                  </Link>
+                  <Link to="/venues/comparison">
+                    <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
+                      <Building2 className="h-4 w-4 mr-2" />
+                      Venue Analytics
+                    </Button>
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="lg:hidden">
@@ -89,12 +107,20 @@ export function Navigation() {
                 </div>
                 <div className="space-y-4">
                   <NavContent />
-                  {!isOrganizerRoute && (
-                    <Link to="/organizer" onClick={() => setIsOpen(false)}>
-                      <Button variant="outline" className="w-full border-gray-600 text-gray-300">
-                        Organizer Login
-                      </Button>
-                    </Link>
+                  {!isOrganizerRoute && !isVenueRoute && (
+                    <>
+                      <Link to="/organizer" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full border-gray-600 text-gray-300">
+                          Organizer Login
+                        </Button>
+                      </Link>
+                      <Link to="/venues/comparison" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full border-gray-600 text-gray-300">
+                          <Building2 className="h-4 w-4 mr-2" />
+                          Venue Analytics
+                        </Button>
+                      </Link>
+                    </>
                   )}
                 </div>
               </SheetContent>

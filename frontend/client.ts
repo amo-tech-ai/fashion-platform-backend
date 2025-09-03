@@ -36,6 +36,7 @@ export class Client {
     public readonly booking: booking.ServiceClient
     public readonly event: event.ServiceClient
     public readonly realtime: realtime.ServiceClient
+    public readonly venue: venue.ServiceClient
     private readonly options: ClientOptions
     private readonly target: string
 
@@ -53,6 +54,7 @@ export class Client {
         this.booking = new booking.ServiceClient(base)
         this.event = new event.ServiceClient(base)
         this.realtime = new realtime.ServiceClient(base)
+        this.venue = new venue.ServiceClient(base)
     }
 
     /**
@@ -177,6 +179,66 @@ export namespace realtime {
          */
         public async subscribeToEventUpdates(params: { eventId: number }): Promise<StreamIn<StreamResponse<typeof api_realtime_subscribe_subscribeToEventUpdates>>> {
             return await this.baseClient.createStreamIn(`/events/${encodeURIComponent(params.eventId)}/subscribe`)
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
+import { getAnalytics as api_venue_analytics_getAnalytics } from "~backend/venue/analytics";
+import { getComparison as api_venue_comparison_getComparison } from "~backend/venue/comparison";
+import { getOptimization as api_venue_optimization_getOptimization } from "~backend/venue/optimization";
+
+export namespace venue {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.getAnalytics = this.getAnalytics.bind(this)
+            this.getComparison = this.getComparison.bind(this)
+            this.getOptimization = this.getOptimization.bind(this)
+        }
+
+        /**
+         * Get comprehensive venue analytics
+         */
+        public async getAnalytics(params: RequestType<typeof api_venue_analytics_getAnalytics>): Promise<ResponseType<typeof api_venue_analytics_getAnalytics>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/venues/${encodeURIComponent(params.venue)}/analytics`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_venue_analytics_getAnalytics>
+        }
+
+        /**
+         * Compare performance across all venues
+         */
+        public async getComparison(params: RequestType<typeof api_venue_comparison_getComparison>): Promise<ResponseType<typeof api_venue_comparison_getComparison>> {
+            // Convert our params into the objects we need for the request
+            const query = makeRecord<string, string | string[]>({
+                endDate:   params.endDate,
+                startDate: params.startDate,
+            })
+
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/venues/comparison`, {query, method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_venue_comparison_getComparison>
+        }
+
+        /**
+         * Get optimization recommendations for a venue
+         */
+        public async getOptimization(params: { venue: string }): Promise<ResponseType<typeof api_venue_optimization_getOptimization>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/venues/${encodeURIComponent(params.venue)}/optimization`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_venue_optimization_getOptimization>
         }
     }
 }

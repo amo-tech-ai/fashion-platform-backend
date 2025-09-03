@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { Calendar, DollarSign, Ticket, TrendingUp, PlusCircle } from 'lucide-react';
+import { Calendar, DollarSign, Ticket, TrendingUp, PlusCircle, Building2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,10 +44,18 @@ export function OrganizerDashboard() {
             <h1 className="text-3xl font-bold text-white">Fashion Events Dashboard</h1>
             <p className="text-gray-400">Welcome back, Organizer!</p>
           </div>
-          <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Create Event
-          </Button>
+          <div className="flex items-center space-x-4">
+            <Link to="/venues/comparison">
+              <Button variant="outline" className="border-gray-600 text-gray-300">
+                <Building2 className="h-4 w-4 mr-2" />
+                Venue Analytics
+              </Button>
+            </Link>
+            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -102,10 +110,16 @@ export function OrganizerDashboard() {
                   <div key={event.id} className="p-4 bg-gray-800/50 rounded-lg">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                       <div className="flex-1 mb-4 md:mb-0">
-                        <Link to={`/events/${event.id}/analytics`}>
+                        <Link to={`/organizer/events/${event.id}/analytics`}>
                           <h3 className="text-lg font-semibold text-white hover:text-purple-400 transition-colors">{event.name}</h3>
                         </Link>
                         <p className="text-sm text-gray-400">{new Date(event.date).toLocaleDateString()} • {event.venue}</p>
+                        <Link 
+                          to={`/venues/${encodeURIComponent(event.venue)}/analytics`}
+                          className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                        >
+                          View venue analytics →
+                        </Link>
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between text-sm mb-1">
