@@ -61,7 +61,7 @@ export const uploadAsset = api<{ contractId: number; assetType: string; fileUrl:
 // Cron job to send activation reminders
 export const sendActivationReminders = new CronJob("send-activation-reminders", {
   schedule: "0 0 * * *",
-  endpoint: async () => {
+  handler: async () => {
     const upcomingActivations = await db.queryAll`
         SELECT * FROM sponsor_activations
         WHERE status = 'pending' AND due_date BETWEEN NOW() AND NOW() + INTERVAL '7 days'
@@ -76,7 +76,7 @@ export const sendActivationReminders = new CronJob("send-activation-reminders", 
 // Cron job to generate renewal offers
 export const generateRenewalOffers = new CronJob("generate-renewal-offers", {
   schedule: "0 0 * * *",
-  endpoint: async () => {
+  handler: async () => {
     const expiringContracts = await db.queryAll`
         SELECT * FROM sponsor_contracts
         WHERE renewal_status = 'pending' AND end_date BETWEEN NOW() AND NOW() + INTERVAL '90 days'
