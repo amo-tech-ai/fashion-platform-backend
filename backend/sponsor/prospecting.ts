@@ -1,4 +1,4 @@
-import { api, APIError } from "encore.dev/api";
+import { api, APIError, Query } from "encore.dev/api";
 import { db } from "./db";
 import type { SponsorProspect, SponsorLead } from "./types";
 
@@ -61,5 +61,34 @@ export const convertToLead = api<{ prospectId: number; contactName: string; cont
       await tx.rollback();
       throw e;
     }
+  }
+);
+
+export interface GetProspectsParams {
+  status?: Query<string>;
+  limit?: Query<number>;
+  offset?: Query<number>;
+}
+
+export interface GetProspectsResponse {
+  prospects: SponsorProspect[];
+  total: number;
+}
+
+// Get sponsor prospects
+export const getProspects = api<GetProspectsParams, GetProspectsResponse>(
+  { method: "GET", path: "/sponsor/prospects" },
+  async ({ status = 'new', limit = 50, offset = 0 }) => {
+    const prospects = await db.queryAll`
+      SELECT * FROM sponsor_prospects
+      WHERE status = ${status}
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    const totalResult = await db.queryRow`SELECT COUNT(*) as count FROM sponsor_prospects WHERE status = ${status}`;
+    return {
+      prospects: prospects as SponsorProspect[],
+      total: totalResult?.count || 0,
+    };
   }
 );

@@ -11,12 +11,12 @@ export function SponsorProspecting() {
   // This is a simplified view. In a real app, you'd have state for filters.
   const { data, isLoading } = useQuery({
     queryKey: ['sponsor-prospects'],
-    queryFn: () => db.queryAll`SELECT * FROM sponsor_prospects WHERE status = 'new' LIMIT 50`,
+    queryFn: () => backend.sponsor.getProspects({ status: 'new', limit: 50 }),
   });
 
-  const { data: campaigns } = useQuery({
+  const { data: campaignsData } = useQuery({
     queryKey: ['outreach-campaigns'],
-    queryFn: () => db.queryAll`SELECT * FROM outreach_campaigns WHERE is_active = true`,
+    queryFn: () => backend.sponsor.getCampaigns(),
   });
 
   if (isLoading) {
@@ -67,16 +67,16 @@ export function SponsorProspecting() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data?.map((prospect: any) => (
+                    {data?.prospects.map((prospect: any) => (
                       <TableRow key={prospect.id} className="border-gray-800">
                         <TableCell>
-                          <div className="font-medium text-white">{prospect.company_name}</div>
+                          <div className="font-medium text-white">{prospect.companyName}</div>
                           <a href={prospect.website} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline">
                             {prospect.website}
                           </a>
                         </TableCell>
                         <TableCell className="text-gray-300">{prospect.industry}</TableCell>
-                        <TableCell className="text-yellow-400 font-bold">{prospect.fit_score}</TableCell>
+                        <TableCell className="text-yellow-400 font-bold">{prospect.fitScore}</TableCell>
                         <TableCell>
                           <Button size="sm" variant="outline" className="border-gray-600 text-gray-300">
                             Convert to Lead
@@ -99,7 +99,7 @@ export function SponsorProspecting() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {campaigns?.map((campaign: any) => (
+                {campaignsData?.campaigns.map((campaign: any) => (
                   <div key={campaign.id} className="p-3 bg-gray-800/50 rounded-lg">
                     <h4 className="text-white font-medium">{campaign.name}</h4>
                     <p className="text-gray-400 text-sm">{campaign.description}</p>

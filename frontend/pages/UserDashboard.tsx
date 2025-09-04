@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GroupBookingCard } from '../components/GroupBookingCard';
+import { RecommendationCard } from '../components/RecommendationCard';
 import backend from '~backend/client';
 
 export function UserDashboard() {
@@ -236,55 +237,9 @@ export function UserDashboard() {
                     <p className="text-gray-500 text-sm">Book some events to get personalized recommendations!</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {recommendations?.recommendations.slice(0, 5).map((event) => (
-                      <div key={event.id} className="p-4 bg-gray-800/50 rounded-lg">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            <h3 className="text-white font-semibold text-lg">{event.name}</h3>
-                            <div className="flex items-center space-x-4 text-gray-400 text-sm mt-1">
-                              <div className="flex items-center space-x-1">
-                                <Calendar className="h-4 w-4" />
-                                <span>{new Date(event.date).toLocaleDateString()}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <MapPin className="h-4 w-4" />
-                                <span>{event.venue}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <DollarSign className="h-4 w-4" />
-                                <span>From ${event.minPrice}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-purple-400 font-semibold text-sm">
-                              {event.recommendationScore}% match
-                            </div>
-                            <Progress value={event.recommendationScore} className="w-20 h-2 mt-1" />
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {event.recommendationReasons.map((reason, index) => (
-                            <Badge key={index} className="bg-purple-600/20 text-purple-400 border-purple-600/30 text-xs">
-                              {reason}
-                            </Badge>
-                          ))}
-                        </div>
-
-                        <div className="flex justify-between items-center">
-                          <div className="text-gray-400 text-sm">
-                            {event.available} tickets available
-                          </div>
-                          <Button 
-                            size="sm" 
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
-                          >
-                            View Details
-                          </Button>
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {recommendations?.recommendations.slice(0, 4).map((event) => (
+                      <RecommendationCard key={event.id} event={event} />
                     ))}
                   </div>
                 )}
@@ -449,7 +404,7 @@ export function UserDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       {insights.spendingPatterns.map((pattern) => (
-                        <div key={pattern.month} className="flex items-center justify-between">
+                        <div key={pattern.month.toString()} className="flex items-center justify-between">
                           <span className="text-gray-300">
                             {new Date(pattern.month).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                           </span>

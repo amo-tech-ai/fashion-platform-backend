@@ -5,33 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-
-interface RecommendedEvent {
-  id: number;
-  name: string;
-  date: Date;
-  venue: string;
-  capacity: number;
-  description?: string;
-  organizerId: number;
-  status: string;
-  createdAt: Date;
-  publishedAt?: Date;
-  tickets: Array<{
-    id: number;
-    eventId: number;
-    name: string;
-    price: number;
-    quantity: number;
-    createdAt: Date;
-  }>;
-  available: number;
-  soldOut: boolean;
-  minPrice: number;
-  maxPrice: number;
-  recommendationScore: number;
-  recommendationReasons: string[];
-}
+import type { RecommendedEvent } from '~backend/recommendation/engine';
 
 interface RecommendationCardProps {
   event: RecommendedEvent;

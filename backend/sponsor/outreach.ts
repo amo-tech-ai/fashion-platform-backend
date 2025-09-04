@@ -33,6 +33,17 @@ export const enrollLeadInCampaign = api<{ leadId: number; campaignId: number }, 
   }
 );
 
+// Get all active outreach campaigns
+export const getCampaigns = api<void, { campaigns: OutreachCampaign[] }>(
+  { method: "GET", path: "/sponsor/campaigns" },
+  async () => {
+    const campaigns = await db.queryAll`
+      SELECT * FROM outreach_campaigns WHERE is_active = true
+    `;
+    return { campaigns: campaigns as OutreachCampaign[] };
+  }
+);
+
 // Cron job to send scheduled emails
 export const sendScheduledEmails = cron("send-outreach-emails", {
   schedule: "every 1 hour",
