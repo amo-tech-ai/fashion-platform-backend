@@ -1,6 +1,6 @@
 import { api, APIError } from "encore.dev/api";
 import { db } from "./db";
-import { cron } from "encore.dev/cron";
+import { CronJob } from "encore.dev/cron";
 import { notification } from "~encore/clients";
 import type { OutreachCampaign, CampaignEmail, LeadCampaignEnrollment } from "./types";
 
@@ -45,8 +45,8 @@ export const getCampaigns = api<void, { campaigns: OutreachCampaign[] }>(
 );
 
 // Cron job to send scheduled emails
-export const sendScheduledEmails = cron("send-outreach-emails", {
-  schedule: "every 1 hour",
+export const sendScheduledEmails = new CronJob("send-outreach-emails", {
+  schedule: "@hourly",
   handler: async () => {
     const enrollments = await db.queryAll`
       SELECT * FROM lead_campaign_enrollment

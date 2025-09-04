@@ -1,6 +1,6 @@
 import { api, APIError } from "encore.dev/api";
 import { db } from "./db";
-import { cron } from "encore.dev/cron";
+import { CronJob } from "encore.dev/cron";
 import { notification } from "~encore/clients";
 import type { SponsorContract, SponsorAsset, SponsorActivation, RenewalOffer } from "./types";
 
@@ -59,8 +59,8 @@ export const uploadAsset = api<{ contractId: number; assetType: string; fileUrl:
 );
 
 // Cron job to send activation reminders
-export const sendActivationReminders = cron("send-activation-reminders", {
-  schedule: "every day",
+export const sendActivationReminders = new CronJob("send-activation-reminders", {
+  schedule: "@daily",
   handler: async () => {
     const upcomingActivations = await db.queryAll`
       SELECT * FROM sponsor_activations
@@ -74,8 +74,8 @@ export const sendActivationReminders = cron("send-activation-reminders", {
 });
 
 // Cron job to generate renewal offers
-export const generateRenewalOffers = cron("generate-renewal-offers", {
-  schedule: "every day",
+export const generateRenewalOffers = new CronJob("generate-renewal-offers", {
+  schedule: "@daily",
   handler: async () => {
     const expiringContracts = await db.queryAll`
       SELECT * FROM sponsor_contracts
