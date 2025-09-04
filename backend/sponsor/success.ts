@@ -58,38 +58,42 @@ export const uploadAsset = api<{ contractId: number; assetType: string; fileUrl:
   }
 );
 
+async function sendActivationRemindersHandler() {
+  const upcomingActivations = await db.queryAll`
+      SELECT * FROM sponsor_activations
+      WHERE status = 'pending' AND due_date BETWEEN NOW() AND NOW() + INTERVAL '7 days'
+    `;
+  for (const activation of upcomingActivations) {
+    // In a real app, you'd get sponsor contact info and send an email
+    console.log(`Reminder for activation ${activation.id} due on ${activation.due_date}`);
+  }
+}
+
 // Cron job to send activation reminders
 export const sendActivationReminders = new CronJob("send-activation-reminders", {
   schedule: "0 0 * * *",
-  handler: async () => {
-    const upcomingActivations = await db.queryAll`
-        SELECT * FROM sponsor_activations
-        WHERE status = 'pending' AND due_date BETWEEN NOW() AND NOW() + INTERVAL '7 days'
-      `;
-    for (const activation of upcomingActivations) {
-      // In a real app, you'd get sponsor contact info and send an email
-      console.log(`Reminder for activation ${activation.id} due on ${activation.due_date}`);
-    }
-  },
+  handler: sendActivationRemindersHandler,
 });
+
+async function generateRenewalOffersHandler() {
+  const expiringContracts = await db.queryAll`
+      SELECT * FROM sponsor_contracts
+      WHERE renewal_status = 'pending' AND end_date BETWEEN NOW() AND NOW() + INTERVAL '90 days'
+    `;
+  for (const contract of expiringContracts) {
+    const offerAmount = contract.total_amount * 0.9; // 10% early bird discount
+    await db.exec`
+        INSERT INTO renewal_offers (contract_id, offer_amount, incentives, status)
+        VALUES (${contract.id}, ${offerAmount}, ARRAY['10% discount', 'Priority booth selection'], 'draft')
+      `;
+    await db.exec`
+        UPDATE sponsor_contracts SET renewal_status = 'offered' WHERE id = ${contract.id}
+      `;
+  }
+}
 
 // Cron job to generate renewal offers
 export const generateRenewalOffers = new CronJob("generate-renewal-offers", {
   schedule: "0 0 * * *",
-  handler: async () => {
-    const expiringContracts = await db.queryAll`
-        SELECT * FROM sponsor_contracts
-        WHERE renewal_status = 'pending' AND end_date BETWEEN NOW() AND NOW() + INTERVAL '90 days'
-      `;
-    for (const contract of expiringContracts) {
-      const offerAmount = contract.total_amount * 0.9; // 10% early bird discount
-      await db.exec`
-          INSERT INTO renewal_offers (contract_id, offer_amount, incentives, status)
-          VALUES (${contract.id}, ${offerAmount}, ARRAY['10% discount', 'Priority booth selection'], 'draft')
-        `;
-      await db.exec`
-          UPDATE sponsor_contracts SET renewal_status = 'offered' WHERE id = ${contract.id}
-        `;
-    }
-  },
+  handler: generateRenewalOffersHandler,
 });
