@@ -46,47 +46,48 @@ export const getCampaigns = api<void, { campaigns: OutreachCampaign[] }>(
 
 // Cron job to send scheduled emails
 export const sendScheduledEmails = new CronJob("send-outreach-emails", {
-  schedule: "every 1 hour",
-}, async () => {
-  const enrollments = await db.queryAll`
-      SELECT * FROM lead_campaign_enrollment
-      WHERE status = 'active'
-    `;
-
-  for (const enrollment of enrollments) {
-    const lastSent = enrollment.last_sent_at ? new Date(enrollment.last_sent_at) : new Date(enrollment.enrolled_at);
-    const nextEmail = await db.queryRow`
-        SELECT * FROM campaign_emails
-        WHERE campaign_id = ${enrollment.campaign_id}
-          AND sequence_number = ${enrollment.current_sequence}
+  schedule: "0 * * * *",
+  endpoint: async () => {
+    const enrollments = await db.queryAll`
+        SELECT * FROM lead_campaign_enrollment
+        WHERE status = 'active'
       `;
 
-    if (nextEmail) {
-      const sendDate = new Date(lastSent);
-      sendDate.setDate(sendDate.getDate() + nextEmail.delay_days);
-
-      if (new Date() >= sendDate) {
-        const lead = await db.queryRow`SELECT * FROM sponsor_leads WHERE id = ${enrollment.lead_id}`;
-        if (lead) {
-          // Mock sending email
-          console.log(`Sending email sequence ${nextEmail.sequence_number} to ${lead.contact_email}`);
-          
-          // Update enrollment
-          await db.exec`
-              UPDATE lead_campaign_enrollment
-              SET current_sequence = ${enrollment.current_sequence + 1},
-                  last_sent_at = NOW()
-              WHERE id = ${enrollment.id}
-            `;
-        }
-      }
-    } else {
-      // Campaign completed
-      await db.exec`
-          UPDATE lead_campaign_enrollment
-          SET status = 'completed'
-          WHERE id = ${enrollment.id}
+    for (const enrollment of enrollments) {
+      const lastSent = enrollment.last_sent_at ? new Date(enrollment.last_sent_at) : new Date(enrollment.enrolled_at);
+      const nextEmail = await db.queryRow`
+          SELECT * FROM campaign_emails
+          WHERE campaign_id = ${enrollment.campaign_id}
+            AND sequence_number = ${enrollment.current_sequence}
         `;
+
+      if (nextEmail) {
+        const sendDate = new Date(lastSent);
+        sendDate.setDate(sendDate.getDate() + nextEmail.delay_days);
+
+        if (new Date() >= sendDate) {
+          const lead = await db.queryRow`SELECT * FROM sponsor_leads WHERE id = ${enrollment.lead_id}`;
+          if (lead) {
+            // Mock sending email
+            console.log(`Sending email sequence ${nextEmail.sequence_number} to ${lead.contact_email}`);
+            
+            // Update enrollment
+            await db.exec`
+                UPDATE lead_campaign_enrollment
+                SET current_sequence = ${enrollment.current_sequence + 1},
+                    last_sent_at = NOW()
+                WHERE id = ${enrollment.id}
+              `;
+          }
+        }
+      } else {
+        // Campaign completed
+        await db.exec`
+            UPDATE lead_campaign_enrollment
+            SET status = 'completed'
+            WHERE id = ${enrollment.id}
+          `;
+      }
     }
-  }
+  },
 });
