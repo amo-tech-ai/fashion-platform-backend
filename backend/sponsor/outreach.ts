@@ -46,7 +46,7 @@ export const getCampaigns = api<void, { campaigns: OutreachCampaign[] }>(
 
 // Cron job to send scheduled emails
 export const sendScheduledEmails = new CronJob("send-outreach-emails", {
-  schedule: "@hourly",
+  schedule: "0 * * * *",
   handler: async () => {
     const enrollments = await db.queryAll`
       SELECT * FROM lead_campaign_enrollment
